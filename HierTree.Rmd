@@ -1,6 +1,6 @@
 ---
 title: "HierTree"
-output: html_notebook
+output: html_document
 date: "2024-02-06"
 ---
 
@@ -8,6 +8,7 @@ date: "2024-02-06"
 
 This script can be used to plot a hierarchical tree like the one presented in Yao et al., 2023 Figure 1.
 The input can be a data frame with rows representing the leaf-level and columns represent annotations. This data frame needs to be restructured to a parent-child (hierarchical network data frame), which is what the 'as.hierDF' does. 
+
 
 ```{r setup, include=FALSE} 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
@@ -124,4 +125,5 @@ flat_plot = ggraph(graph, layout = 'dendrogram', circular = FALSE) +
 ```{r plot tree, fig.width=12, fig.height=4,echo=F}
 flat_plot
 ```
+
 

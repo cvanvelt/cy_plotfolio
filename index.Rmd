@@ -2,6 +2,14 @@
 title: "Cy's plotfolio"
 ---
 
+A collection of notebooks to recreate some of the visualizations as published in my [scientific papers](https://scholar.google.com/citations?user=No8cy_cAAAAJ&hl=en).
 
 
+## Visualizations
+[**HierTree**](docs/HierTree.html): An example for plotting a hierarchical tree (not dendrogram!) based on result from hierarchical clustering.
+
+
+```{r, eval=F}
+# HierTree - ![half-size image](foo.jpg){#id .class width=50% height=50%}
+```
 
