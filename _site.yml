@@ -4,6 +4,10 @@ navbar:
   left:
     - text: "Home"
       href: index.html
+    - text: "Plot examples"
+      menu: 
+      - text: HierTree
+        href: HierTree.html  
     - text: "About"
       href: about.html
 output_dir: docs

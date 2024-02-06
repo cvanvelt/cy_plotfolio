@@ -10,8 +10,9 @@
 
 
 
+<meta name="date" content="2024-02-06" />
 
-<title>About This Website</title>
+<title>HierTree</title>
 
 <script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -272,12 +273,105 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">About This Website</h1>
+<h1 class="title toc-ignore">HierTree</h1>
+<h4 class="date">2024-02-06</h4>
 
 </div>
 
 
-<p>More about this website.</p>
+<div id="plotting-a-hierarchical-tree" class="section level2">
+<h2>Plotting a hierarchical tree</h2>
+<p>This script can be used to plot a hierarchical tree like the one
+presented in Yao et al., 2023 Figure 1. The input can be a data frame
+with rows representing the leaf-level and columns represent annotations.
+This data frame needs to be restructured to a parent-child (hierarchical
+network data frame), which is what the ‘as.hierDF’ does.</p>
+<p>Let’s start by loading some dummy hierarchical data.</p>
+<pre class="r"><code>gs4_deauth()
+
+ss &lt;- &quot;https://docs.google.com/spreadsheets/d/1VMs1Vs6hhNDYuUQsgBpwDiaGimPGYldR6WVS2WiS5nQ/edit?usp=sharing&quot;
+cl.df &lt;- read_sheet(ss, sheet=&quot;cl.df&quot;)
+
+st_colors = read_sheet(ss, sheet = &quot;supertypes&quot;)
+sub.cols &lt;- read_sheet(ss, sheet=&quot;subclasses&quot;)
+class.cols &lt;- read_sheet(ss, sheet=&quot;classes&quot;)</code></pre>
+<p>A hierarchic structure is basically a set of nodes, with edges
+linking nodes. Let’s create an edge list for plotting using the <igraph>
+package.</p>
+<pre class="r"><code>source(&quot;R/as.hierDF.R&quot;)
+
+
+hierDF &lt;- as.hierDF(cl.df, levels = c(&quot;class_id_label&quot;, &quot;subclass_id_label&quot;,&quot;supertype_id_label&quot;),rootname=&quot;wmb&quot;)</code></pre>
+<pre><code>## [1] 1
+## [1] 2
+## [1] 3</code></pre>
+<pre class="r"><code># Create a graph object
+graph &lt;- graph_from_data_frame( hierDF)
+
+
+dummy &lt;- ggraph(graph, layout = &#39;dendrogram&#39;, circular = FALSE) + 
+  geom_edge_diagonal()
+
+dend_leaves &lt;- dummy[[&quot;data&quot;]] %&gt;% filter(leaf == TRUE)
+
+n_leaves &lt;- nrow(dend_leaves)
+
+dend_leaves &lt;- dend_leaves %&gt;% left_join(st_colors[,c(&quot;supertype_id_label&quot;, &quot;supertype_color&quot;,&quot;supertype_id&quot;)], by=c(&quot;name&quot;=&quot;supertype_id_label&quot;))
+
+subclass.df &lt;- dummy[[&quot;data&quot;]] %&gt;% filter(name %in% sub.cols$subclass_id_label) %&gt;% left_join(sub.cols[,c(&quot;subclass_id_label&quot;,&quot;subclass_id&quot;, &quot;subclass_color&quot;)], by=c(&quot;name&quot;=&quot;subclass_id_label&quot;))
+subclass.df$subclass_id &lt;- gsub( &quot; .*$&quot;, &quot;&quot;, subclass.df$name) 
+
+class.df &lt;-  dummy[[&quot;data&quot;]] %&gt;% filter(name %in% class.cols$class_id_label) %&gt;% left_join(class.cols[,c(&quot;class_id_label&quot;, &quot;class_color&quot;)], by=c(&quot;name&quot;=&quot;class_id_label&quot;))</code></pre>
+<p>Next use ggraph to plot the ‘dendrogram’ and add additional layers of
+labeling using standard ggplot.</p>
+<pre class="r"><code>flat_plot = ggraph(graph, layout = &#39;dendrogram&#39;, circular = FALSE) + 
+  geom_edge_diagonal(width = 0.25,
+                     color=&quot;grey50&quot;) +
+  #supertype
+  geom_point(data = dend_leaves, 
+             aes(x=x, y=y, color=supertype_color),
+             cex=1,
+             shape=19) +
+  scale_color_identity(guide = &quot;none&quot;) +
+  # subclass
+  new_scale_color() +
+  geom_point(data=subclass.df, 
+             aes(x=x, y=y, color= subclass_color),
+             cex=2,
+             shape=19)+
+  geom_text(data=subclass.df, 
+             aes(x=x, y=y, label= subclass_id),
+             size=3,hjust=0, vjust=0.5,
+             angle=90)+ #,             direction=&#39;y&#39;)+
+    scale_color_identity(guide = &quot;none&quot;) +
+  # class
+  new_scale_color() +
+  geom_point(data=class.df, 
+             aes(x=x, y=y, color= class_color),
+             cex=2,
+             shape=19)+
+  geom_text_repel(data=class.df, 
+             aes(x=x, y=y, label= name),
+             size=3,hjust=1, vjust=0.5,
+             direction=&#39;y&#39;)+
+  scale_color_identity(guide = &quot;none&quot;) +
+  # add other levels if needed
+  geom_text(data=dend_leaves,
+            aes(x = x,
+                y = y-0.1,
+                label = name),
+            angle = 90,
+            hjust = 1.0,
+            vjust = 0.5,
+            size = 3,
+            lineheight=0.1) +
+  scale_x_continuous(limits = c(-1,n_leaves + 1),
+                     expand=c(0,0)) +  
+  coord_cartesian(clip = &#39;off&#39;)  +
+  theme_void()  +
+  theme(plot.margin = margin(t = 0, r = 0, b = 120, l = 0,))</code></pre>
+<p><img src="HierTree_files/figure-html/plot%20tree-1.png" width="1152" /></p>
+</div>
 
 
 
