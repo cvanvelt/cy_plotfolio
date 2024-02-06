@@ -9,12 +9,15 @@ date: "2024-02-06"
 This script can be used to plot a hierarchical tree like the one presented in Yao et al., 2023 Figure 1.
 The input can be a data frame with rows representing the leaf-level and columns represent annotations. This data frame needs to be restructured to a parent-child (hierarchical network data frame), which is what the 'as.hierDF' does. 
 
+```{r klippy, echo=FALSE, include=TRUE}
+klippy::klippy()
+```
 
 ```{r setup, include=FALSE} 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 ```
 
-```{r loading libs, echo=F}
+```{r loading libs, echo=T}
 
 
 library(dplyr)
