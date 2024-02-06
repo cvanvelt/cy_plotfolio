@@ -1,5 +1,9 @@
 ---
 title: "Cy's plotfolio"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 A collection of notebooks to recreate some of the visualizations as published in my [scientific papers](https://scholar.google.com/citations?user=No8cy_cAAAAJ&hl=en).

@@ -29,6 +29,9 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -219,6 +222,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -226,6 +292,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -281,19 +357,53 @@ $(document).ready(function () {
 published in my <a
 href="https://scholar.google.com/citations?user=No8cy_cAAAAJ&amp;hl=en">scientific
 papers</a>.</p>
-<div id="visualizations" class="section level2">
-<h2>Visualizations</h2>
+<div id="visualizations---hierarchy" class="section level2">
+<h2>Visualizations - hierarchy</h2>
 <p><a href="HierTree.html"><strong>HierTree</strong></a>: An example for
 plotting a hierarchical tree (not dendrogram!) based on result from
 hierarchical clustering.</p>
 <p><img src="images/HierTree.png" /></p>
 <p><br> <br></p>
+<p><a href="Sunburst.html"><strong>Sunburst</strong></a>:</p>
+<p><br> <br></p>
+</div>
+<div id="visualizations---scsnrna-seq" class="section level2">
+<h2>Visualizations - sc/snRNA-seq</h2>
 <p><a href="UCon.html"><strong>UMAP-Constellation</strong></a>: Creating
 a UMAP and constellation from small single cell RNA-seq dataset</p>
+<p><br> <br></p>
+<p><a href="3dUMAP.html"><strong>3D UMAP</strong></a>: Creating a 3D
+UMAP from small single cell RNA-seq dataset</p>
+<p><br> <br></p>
+<p><a href="Node_dodge.html"><strong>Node dodge app </strong></a>:
+Creating a 3D UMAP from small single cell RNA-seq dataset</p>
+<p><br> <br></p>
+</div>
+<div id="visualizations---spatialtx" class="section level2">
+<h2>Visualizations - spatialTX</h2>
+<p><a href="MERFISH_plot.html"><strong>SpatialTx with CCF
+outlines</strong></a>:</p>
+<p><br> <br></p>
+<p><a href="3dMERFISH_plot.html"><strong>3D SpatialTx</strong></a>:</p>
+<p><br> <br></p>
+</div>
+<div id="visualizations---ccf" class="section level2">
+<h2>Visualizations - CCF</h2>
+<p><a href="Flatmap.html"><strong>Flatmaps</strong></a>:</p>
+<p><br> <br></p>
+<p><a href="abaISH.html"><strong>ABA - ISH</strong></a>:</p>
+<p><br> <br></p>
+<p><a href="abaSVG.html"><strong>ABA - svg</strong></a>:</p>
+<p><br> <br></p>
+</div>
+<div id="visualizations---random" class="section level2">
+<h2>Visualizations - random</h2>
 </div>
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -326,6 +436,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
