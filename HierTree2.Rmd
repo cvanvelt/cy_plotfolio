@@ -1,6 +1,6 @@
 ---
 title: "HierTree"
-output: html_notebook
+output: html_document
 date: "2024-02-06"
 ---
 
@@ -124,4 +124,5 @@ flat_plot = ggraph(graph, layout = 'dendrogram', circular = FALSE) +
 ```{r plot tree, fig.width=12, fig.height=4,echo=F}
 flat_plot
 ```
+
 
