@@ -1,0 +1,12 @@
+name: "Cy-plotfolio"
+navbar:
+  title: "Cy's plotfolio"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+output_dir: docs
+output:
+  html_document:
+    theme: yeti
