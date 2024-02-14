@@ -5,7 +5,7 @@ output:
     toc: true
     toc_float: true
     code_download: true
-    code_folding: show
+    code_folding: hide
 date: "2024-02-06"
 ---
 
@@ -24,99 +24,56 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
 ```{r loading libs, echo=T}
 
-
-library(dplyr)
-library(ggplot2)
-library(ggnewscale)
-library(googlesheets4)
-library(ggraph)
-library(igraph)
-library(tidyverse)
+require(dplyr)
+require(ggplot2)
+require(ggnewscale)
+require(ggraph)
+require(igraph)
+require(tidyverse)
 #theme_set(theme_void())
-library(ggrepel)
+require(ggrepel)
 
 ```
 
 Let's start by loading some dummy hierarchical data.
 
-```{r load gsheets}
-gs4_deauth()
+```{r, echo=T, eval=T}
+URL = 'https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/metadata/WMB-taxonomy/20231215/cl.df_CCN202307220.xlsx'
+data = rio::import_list(URL)
 
-ss <- "https://docs.google.com/spreadsheets/d/1VMs1Vs6hhNDYuUQsgBpwDiaGimPGYldR6WVS2WiS5nQ/edit?usp=sharing"
-cl.df <- read_sheet(ss, sheet="cl.df")
+colors <- rio::import("https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/metadata/WMB-taxonomy/20231215/views/cluster_to_cluster_annotation_membership_color.csv")
+```
 
-st_colors = read_sheet(ss, sheet = "supertypes")
-sub.cols <- read_sheet(ss, sheet="subclasses")
-class.cols <- read_sheet(ss, sheet="classes")
+```{r, echo=T, eval=T}
+
+cl.df <- data$cluster_annotation
+cl.df <- cl.df[cl.df$class_label != "LQ",]
+
+# add colors to cluster data frame
+colors$cluster_alias <- as.character(as.integer(colors$cluster_alias))
+cl.df <- cl.df %>% left_join(colors, by=c("cl"="cluster_alias"))
+
+select.columns <- colnames(cl.df)[grep("^supertype", colnames(cl.df))]
+st.df <- cl.df %>% group_by_at(select.columns) %>% summarise(n=n())
+
+select.columns <- colnames(cl.df)[grep("^subclass", colnames(cl.df))]
+sc.df <- cl.df %>% group_by_at(select.columns) %>% summarise(n=n())
+
+select.columns <- colnames(cl.df)[grep("^class", colnames(cl.df))]
+c.df <- cl.df %>% group_by_at(select.columns) %>% summarise(n=n())
 
 ```
-A hierarchic structure is basically a set of nodes, with edges linking nodes. Let's create an edge list for plotting using the <igraph> package.
 
-```{r, echo=F, eval=F}
-#' Create hierarchical data frame for hierarchical visualization 
-#'
-#' @author Cindy van Velthoven
-#'
-#' @param cl.df level annotations
-#' @param levels hierarchical levels to be visualized
-#' @param rootname the name to be given to the center of the plot. Default is "total"
-#'
-#' 
-#' @usage hierDF <- as.hierDF(cl.df, levels = c("class_id_label", "subclass_id_label","supertype_id_label"),rootname="wmb")
-#' 
-#' @return Dataframe with hierarchical representation of 
+A hierarchic structure is basically a set of nodes, with edges linking nodes. Let's create an edge list for plotting using the <igraph> package.We'll do this for a subset of the data.
 
-as.hierDF <- function(cl.df, 
-                      levels=c("class_id_label","subclass_id_label","supertype_id_label"),
-                      rootname="all") {
-  
-  sub.df <- cl.df[,levels]
-  
-  ## set root (center)
-  sub.df <- data.frame(root = rootname, sub.df)
-  
-  
-  ## add the first label set == all labels == root
-  hierarchyList <- list()
-  
-  hierDF <- data.frame(parent = character(),
-                       child = character())
-  
-  for(i in seq_along(levels)){
-    print(i)
-    
-    currentCols <- c("root", levels)
-    
-    parentCols <- currentCols[i]
-    idCols <- currentCols[(i+1)]
-    
-    
-    if(is.numeric(sub.df[[idCols]])){
-      sub.df[[idCols]] <- as.character(as.numeric(sub.df[[idCols]]))
-      maxchar <- max(nchar(sub.df[[idCols]]))
-      sub.df[[idCols]] <- stringr::str_pad(sub.df[[idCols]] ,maxchar, pad = "0")
-    }
-    
-    currentDF <- sub.df %>%
-      group_by(.data[[parentCols]],
-               .data[[idCols]]) %>% 
-      summarise(values=n()) %>%
-      select(.data[[parentCols]],
-             .data[[idCols]])
-    
-    colnames(currentDF) <- c("parent","child")
-    hierDF <- rbind(hierDF,currentDF)
-  }
-  
-  
-  return(hierDF)
-}
+```{r, echo=T, eval=T}
+devtools::source_gist("https://gist.github.com/cvanvelt/e0e48336f01c49aa616aaab4abf997d8")
 ```
+
 
 
 ```{r create tree, fig.width=12, fig.height=4, echo=T}
-source("R/as.hierDF.R")
-
+cl.df <- cl.df[cl.df$class_id %in% c(6,7),]
 
 hierDF <- as.hierDF(cl.df, levels = c("class_id_label", "subclass_id_label","supertype_id_label"),rootname="wmb")
 # Create a graph object
@@ -130,12 +87,17 @@ dend_leaves <- dummy[["data"]] %>% filter(leaf == TRUE)
 
 n_leaves <- nrow(dend_leaves)
 
-dend_leaves <- dend_leaves %>% left_join(st_colors[,c("supertype_id_label", "supertype_color","supertype_id")], by=c("name"="supertype_id_label"))
+dend_leaves <- dend_leaves %>% 
+  left_join(st.df[,c("supertype_id_label", "supertype_color","supertype_id")], by=c("name"="supertype_id_label"))
 
-subclass.df <- dummy[["data"]] %>% filter(name %in% sub.cols$subclass_id_label) %>% left_join(sub.cols[,c("subclass_id_label","subclass_id", "subclass_color")], by=c("name"="subclass_id_label"))
+subclass.df <- dummy[["data"]] %>% 
+  filter(name %in% sc.df$subclass_id_label) %>% 
+  left_join(sc.df[,c("subclass_id_label","subclass_id", "subclass_color")], by=c("name"="subclass_id_label"))
 subclass.df$subclass_id <- gsub( " .*$", "", subclass.df$name) 
 
-class.df <-  dummy[["data"]] %>% filter(name %in% class.cols$class_id_label) %>% left_join(class.cols[,c("class_id_label", "class_color")], by=c("name"="class_id_label"))
+class.df <-  dummy[["data"]] %>% 
+  filter(name %in% c.df$class_id_label) %>% 
+  left_join(c.df[,c("class_id_label", "class_color")], by=c("name"="class_id_label"))
 
 ```
 Next use ggraph to plot the 'dendrogram' and add additional layers of labeling using standard ggplot.
@@ -192,7 +154,7 @@ flat_plot = ggraph(graph, layout = 'dendrogram', circular = FALSE) +
 
 ```
 
-```{r plot tree, fig.width=12, fig.height=4,echo=F}
+```{r plot tree, fig.width=12, fig.height=4,echo=T}
 flat_plot
 ```
 
