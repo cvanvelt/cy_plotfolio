@@ -7,7 +7,9 @@ navbar:
     - text: "Plot examples"
       menu: 
       - text: HierTree
-        href: HierTree.html  
+        href: HierTree.html 
+      - text: Sunburst
+        href: Sunburst.html 
     - text: "About"
       href: about.html
 output_dir: docs
