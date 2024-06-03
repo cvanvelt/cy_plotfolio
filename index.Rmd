@@ -29,7 +29,7 @@ knitr::include_graphics("images/fig31_adjust_nodes.png")
 
 ## Visualizations - sc/snRNA-seq
 
-[**UMAP-Constellation**](UCon.html): Creating a UMAP and constellation from small single cell RNA-seq dataset
+[**UMAP-Constellation**](Constellation.html): Creating a UMAP and constellation from small single cell RNA-seq dataset
 
 ![](images/UConn.png)
 

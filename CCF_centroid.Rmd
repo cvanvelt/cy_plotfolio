@@ -1,0 +1,121 @@
+---
+title: "CCFv3 centroid locations"
+author: "Cindy van Velthoven"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_download: true
+    code_folding: show
+date: "2024-05-23"
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+\
+\
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggforce)
+library(cocoframer)
+library(reshape2)
+library(tidyr)
+library(purrr)
+options(stringsAsFactors = FALSE)
+
+```
+\
+
+# Get 3d region centroids:
+
+```{r}
+ccf_anno <- get_ccf_annotation() %>% melt()
+
+ccf_anno <- ccf_anno %>%
+  filter(value != 0)
+names(ccf_anno) <- c("x","y","z","id")
+
+
+ont <- get_mba_ontology() %>% flatten_mba_ontology()
+ont <- generate_mba_taxons(ont)
+
+```
+
+\
+\
+
+```{r}
+region_groups <- data.frame(
+  
+  region_group = c(rep("RHP", 5),
+                   "ENT",
+                   rep("HIP",4),
+                   "ACA",
+                   rep("TEa-PERI-ECT", 3),
+                   "RSP",
+                   rep("VIS", 7),
+                   "VISp",
+                   "PTLp",
+                   "AUD",
+                   "SSp",
+                   rep("SSs-GU-VISC-AIp", 4),
+                   rep("AI", 2),
+                   "CLA",
+                   rep("MOs-FRP", 2),
+                   rep("MOp",1),
+                   rep("PL-ILA-ORB", 3)),
+  acronym = c("PAR","POST","PRE","SUB","ProS",
+              "ENT",
+              "CA","DG","FC","IG",
+              "ACA",
+              "TEa","PERI","ECT",
+              "RSP",
+              "VISal","VISam","VISl","VISpl","VISpm","VISli","VISpor",
+              "VISp",
+              "PTLp",
+              "AUD",
+              "SSp",
+              "SSs","GU","VISC","AIp",
+              "AId","AIv",
+              "CLA",
+              "MOs","FRP",
+              "MOp",
+              "PL","ILA","ORB")
+)
+```
+\
+\
+```{r}
+region_ont <- map_dfr(1:nrow(region_groups),
+                      function(x) {
+                        parent_acronym <- region_groups$acronym[x]
+                        ontology_children <- filter_mba_ontology_children(ont,
+                                                                          parent_acronym,
+                                                                          include_parent = TRUE)
+                        ontology_children$region_group <- region_groups$region_group[x]
+                        ontology_children
+                      })
+```
+
+\
+\
+```{r}
+region_vox <- ccf_anno %>%
+  filter(id %in% region_ont$id) %>%
+  left_join(region_ont)
+```
+\
+\
+
+```{r}
+region_centroids <- region_vox %>%
+  filter(z < 229) %>% # one hemisphere
+  group_by(region_group) %>%
+  summarise(vox = n(),
+            x = mean(x),
+            y = mean(y),
+            z = mean(z))
+```
+

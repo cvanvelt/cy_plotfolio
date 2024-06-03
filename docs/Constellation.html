@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Cindy van Velthoven" />
+
+<meta name="date" content="2024-05-23" />
+
+<title>Constellation plot</title>
+
+<script src="site_libs/header-attrs-2.27/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/clipboard-1.7.1/clipboard.min.js"></script>
+<link href="site_libs/primer-tooltips-1.4.0/build.css" rel="stylesheet" />
+<link href="site_libs/klippy-0.0.0.9500/css/klippy.min.css" rel="stylesheet" />
+<script src="site_libs/klippy-0.0.0.9500/js/klippy.min.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Cy's plotfolio</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Plot examples
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="HierTree.html">HierTree</a>
+    </li>
+    <li>
+      <a href="Sunburst.html">Sunburst</a>
+    </li>
+    <li>
+      <a href="Constellation.html">Constellation</a>
+    </li>
+    <li>
+      <a href="Raincloud.html">Raincloud</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Notebooks
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="CCF_centroid.html">CCF centroid</a>
+    </li>
+    <li>
+      <a href="ABA_ISH.html">ABA ISH data</a>
+    </li>
+    <li>
+      <a href="ABA_svg.html">CCFv3 plates</a>
+    </li>
+    <li>
+      <a href="IBL_flatmap.html">Flatmaps</a>
+    </li>
+    <li>
+      <a href="CR_subsample.html">CellRanger subsample</a>
+    </li>
+    <li>
+      <a href="CR_intron_exon.html">CellRanger intron_exon</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+<li role="separator" class="divider"></li>
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Constellation plot</h1>
+<h4 class="author">Cindy van Velthoven</h4>
+<h4 class="date">2024-05-23</h4>
+
+</div>
+
+
+<p><br />
+<br />
+</p>
+<div id="creating-a-constellation-plot" class="section level2">
+<h2>Creating a constellation plot</h2>
+<p><br />
+</p>
+<p>This notebook can be used to create a constellation plot.</p>
+<p>For the purpose of this notebook, we will use the data from GABAergic
+CGE-derived neurons in cortex. This data is a subset of the data from
+the <a
+href="https://alleninstitute.github.io/abc_atlas_access/intro.html">Allen
+Brain Cell Atlas</a>.</p>
+<p>This notebook will first construct the knn matrix by running the
+<code>get_knn_graph()</code> function which serves as part of the input
+for the <code>plot_constellation()</code> function. More information
+about the functions and their input requirements can be found <a
+href="https://github.com/AllenInstitute/scrattch.bigcat/blob/master/R/KNN.graph.R">here</a>.</p>
+<script>
+  addClassKlippyTo("pre.r, pre.markdown");
+  addKlippy('left', 'top', 'auto', '1', 'Copy code', 'Copied!');
+</script>
+<pre class="r"><code>library(ggplot2)
+library(purrr)
+library(scrattch.vis)
+library(scrattch.hicat)
+library(Matrix)
+library(dplyr)
+library(tidyr)
+library(parallel)
+library(bigstatsr)
+library(scrattch.bigcat)
+library(data.table)
+library(arrow)
+library(BiocNeighbors)</code></pre>
+<pre class="r"><code>URL = &#39;https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/metadata/WMB-taxonomy/20231215/cl.df_CCN202307220.xlsx&#39;
+data = rio::import_list(URL)
+
+colors &lt;- rio::import(&quot;https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/metadata/WMB-taxonomy/20231215/views/cluster_to_cluster_annotation_membership_color.csv&quot;)
+
+URL = &quot;https://allen-brain-cell-atlas.s3-us-west-2.amazonaws.com/metadata/WMB-10X/20231215/cell_metadata.csv&quot;
+anno.df = rio::import(URL)</code></pre>
+<pre class="r"><code>cl.df &lt;- data$cluster_annotation
+cl.df &lt;- cl.df[cl.df$class_label != &quot;LQ&quot;,]
+
+# add colors to cluster data frame
+colors$cluster_alias &lt;- as.character(as.integer(colors$cluster_alias))
+cl.df &lt;- cl.df %&gt;% left_join(colors, by=c(&quot;cl&quot;=&quot;cluster_alias&quot;))
+
+select.columns &lt;- colnames(cl.df)[grep(&quot;^supertype&quot;, colnames(cl.df))]
+st.df &lt;- cl.df %&gt;% group_by_at(select.columns) %&gt;% summarise(n=n())
+
+select.columns &lt;- colnames(cl.df)[grep(&quot;^subclass&quot;, colnames(cl.df))]
+sc.df &lt;- cl.df %&gt;% group_by_at(select.columns) %&gt;% summarise(n=n())
+
+select.columns &lt;- colnames(cl.df)[grep(&quot;^class&quot;, colnames(cl.df))]
+c.df &lt;- cl.df %&gt;% group_by_at(select.columns) %&gt;% summarise(n=n())</code></pre>
+<pre class="r"><code>cl.df &lt;- cl.df %&gt;% filter(class_id == 6)
+cl.df$cl &lt;- as.integer(as.character(cl.df$cl))
+
+anno.df &lt;- anno.df %&gt;% 
+  filter(cluster_alias %in% cl.df$cl) %&gt;% 
+  # filter(library_method == &quot;10Xv3&quot;) %&gt;%
+  left_join(cl.df[,c(1:12)], by=c(&quot;cluster_alias&quot;=&quot;cl&quot;)) 
+rownames(anno.df) &lt;- anno.df$cell_label</code></pre>
+<p>One of the inputs required to generate the KNN graph is a reduced
+dimension matrix. For the purpose of this notebook a pre-made matrix is
+downloaded</p>
+<pre class="r"><code>URL &lt;- &quot;https://allen-share.s3.us-east-2.amazonaws.com/scrattch.example/CTX-CGE_GABA.rd.dat.csv&quot;
+
+rd.dat.df &lt;- rio::import(URL)
+rd.dat = as.matrix(rd.dat.df[,-1])
+row.names(rd.dat) = rd.dat.df[[1]]</code></pre>
+<pre class="r"><code>URL &lt;- &quot;https://allen-share.s3.us-east-2.amazonaws.com/scrattch.example/CTX-CGE_GABA.umap.2d.csv&quot;
+
+umap.df &lt;- rio::import(URL, header = T)
+row.names(umap.df) = umap.df[[1]] 
+umap.df = umap.df[,-1]</code></pre>
+<div id="cluster-constellation" class="section level3">
+<h3>Cluster constellation</h3>
+<pre class="r"><code>cl.cl = with(anno.df %&gt;% filter(library_method==&quot;10Xv3&quot; &amp; 
+  !is.na(subclass_id_label) &amp; cluster_alias %in% cl.df$cl), setNames(cluster_id, cell_label))
+
+rd.dat = rd.dat[intersect(rownames(rd.dat),names(cl.cl)),]</code></pre>
+<pre class="r"><code>result = get_knn_graph(rd.dat, cl=cl.cl, k =50) </code></pre>
+<p>Select the most robust edges for plotting</p>
+<pre class="r"><code>knn.cl.df = result$knn.cl.df 
+knn.cl.df = knn.cl.df %&gt;% group_by(cl.from) %&gt;% mutate(cl.from.rank = rank(-Freq))
+knn.cl.df = knn.cl.df %&gt;% group_by(cl.to) %&gt;% mutate(cl.to.rank = rank(-Freq))
+select.knn.cl.df = with(knn.cl.df, knn.cl.df[odds &gt; 1 &amp; pval.log &lt; log(1/100000) &amp; (frac &gt; 0.1 | frac &gt; 0.03 &amp; Freq &gt; 100) &amp; (cl.from.rank &lt; 4| cl.to.rank &lt; 4),])</code></pre>
+<p>Create the nodes to be plotted on the constellation. The nodes are
+located at the centroid location of cells within a grouping of cells.
+The grouping of cells in this case is cluster. For plotting a few
+columns are expected by the function, these include;</p>
+<ul>
+<li><p>cluster_id</p></li>
+<li><p>cluster_label</p></li>
+<li><p>cluster_color</p></li>
+<li><p>cluster_size</p></li>
+</ul>
+<pre class="r"><code>prefix = &quot;CTX-CGE&quot;
+
+cl.center.df = as.data.frame(get_RD_cl_center(umap.df,cl.cl)) 
+
+cl.df$cluster_size &lt;- rowSums(cl.df[,c(&quot;v3.size&quot;, &quot;v2.size&quot;, &quot;multiome.size&quot;   )])
+
+cl.center.df$cluster_id = as.integer(as.character(row.names(cl.center.df) ))
+cl.center.df &lt;- cl.center.df %&gt;% left_join(cl.df[,c(1:12,48:53)])
+cl.center.df$cluster_label &lt;- cl.center.df$cluster_id_label
+rownames(cl.center.df) &lt;- cl.center.df$cluster_id
+
+# set cl as cluster_id since that was used to summarise the edges
+cl.center.df$cl = as.integer(as.character(row.names(cl.center.df) ))
+
+tmp.cl = cl.center.df$cluster_id
+tmp.knn.cl.df = select.knn.cl.df %&gt;% filter(cl.from %in% tmp.cl &amp; cl.to %in% tmp.cl)</code></pre>
+<pre class="r"><code>  c.plot=plot_constellation(tmp.knn.cl.df, 
+                            cl.center.df=cl.center.df, 
+                            out.dir=&quot;./&quot;,
+                            prefix=paste0(prefix,&quot;.cluster.stcol&quot;),
+                            node.label=&quot;cluster_id&quot;,
+                            exxageration=2,
+                            plot.parts=FALSE,
+                            return.list = T,
+                            node.dodge = F,
+                            label_repel = TRUE,
+                            label.size = 4,
+                            plot.height = 15,
+                            plot.width = 15)
+c.plot$constellation</code></pre>
+<p><img src="Constellation_files/figure-html/plot1-1.png" width="960" /></p>
+</div>
+<div id="adjust-the-color-of-the-nodes-to-reflect-subclasses"
+class="section level3">
+<h3>Adjust the color of the nodes to reflect subclasses</h3>
+<pre class="r"><code>cl.center.df$cluster_color &lt;- cl.center.df$subclass_color
+  c.plot=plot_constellation(tmp.knn.cl.df, 
+                            cl.center.df=cl.center.df, 
+                            out.dir=&quot;./&quot;, # directory for saving files
+                            prefix=paste0(prefix,&quot;.cluster.sccol&quot;), #filename for saving
+                            node.label=&quot;cluster_id&quot;,
+                            exxageration=2,
+                            plot.parts=FALSE,
+                            return.list = T,
+                            node.dodge = F,
+                            label_repel = TRUE,
+                            label.size = 4,
+                            plot.height = 15,
+                            plot.width = 15)
+c.plot$constellation</code></pre>
+<p><img src="Constellation_files/figure-html/plot2-1.png" width="960" /></p>
+</div>
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiQ29uc3RlbGxhdGlvbiBwbG90IgphdXRob3I6ICJDaW5keSB2YW4gVmVsdGhvdmVuIgpvdXRwdXQ6CiAgaHRtbF9kb2N1bWVudDoKICAgIHRvYzogdHJ1ZQogICAgdG9jX2Zsb2F0OiB0cnVlCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlCiAgICBjb2RlX2ZvbGRpbmc6IGhpZGUKZGF0ZTogIjIwMjQtMDUtMjMiCmVkaXRvcl9vcHRpb25zOiAKICBtYXJrZG93bjogCiAgICB3cmFwOiA3MgotLS0KClwKXAoKIyMgQ3JlYXRpbmcgYSBjb25zdGVsbGF0aW9uIHBsb3QKXAoKVGhpcyBub3RlYm9vayBjYW4gYmUgdXNlZCB0byBjcmVhdGUgYSBjb25zdGVsbGF0aW9uIHBsb3QuCgpGb3IgdGhlIHB1cnBvc2Ugb2YgdGhpcyBub3RlYm9vaywgd2Ugd2lsbCB1c2UgdGhlIGRhdGEgZnJvbSBHQUJBZXJnaWMKQ0dFLWRlcml2ZWQgbmV1cm9ucyBpbiBjb3J0ZXguIFRoaXMgZGF0YSBpcyBhIHN1YnNldCBvZiB0aGUgZGF0YSBmcm9tCnRoZSBbQWxsZW4gQnJhaW4gQ2VsbCBBdGxhc10oaHR0cHM6Ly9hbGxlbmluc3RpdHV0ZS5naXRodWIuaW8vYWJjX2F0bGFzX2FjY2Vzcy9pbnRyby5odG1sKS4KClRoaXMgbm90ZWJvb2sgd2lsbCBmaXJzdCBjb25zdHJ1Y3QgdGhlIGtubiBtYXRyaXggYnkgcnVubmluZyB0aGUKYGdldF9rbm5fZ3JhcGgoKWAgZnVuY3Rpb24gd2hpY2ggc2VydmVzIGFzIHBhcnQgb2YgdGhlIGlucHV0IGZvciB0aGUKYHBsb3RfY29uc3RlbGxhdGlvbigpYCBmdW5jdGlvbi4gTW9yZSBpbmZvcm1hdGlvbiBhYm91dCB0aGUgZnVuY3Rpb25zCmFuZCB0aGVpciBpbnB1dCByZXF1aXJlbWVudHMgY2FuIGJlIGZvdW5kIFtoZXJlXShodHRwczovL2dpdGh1Yi5jb20vQWxsZW5JbnN0aXR1dGUvc2NyYXR0Y2guYmlnY2F0L2Jsb2IvbWFzdGVyL1IvS05OLmdyYXBoLlIpLgoKYGBge3Iga2xpcHB5LCBlY2hvPUZBTFNFLCBpbmNsdWRlPVRSVUV9CmtsaXBweTo6a2xpcHB5KCkKYGBgCgpgYGB7ciBzZXR1cCwgaW5jbHVkZT1GQUxTRX0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KHdhcm5pbmcgPSBGQUxTRSwgbWVzc2FnZSA9IEZBTFNFKSAKYGBgCgpgYGB7ciBsb2FkaW5nIGxpYnMsIGVjaG89VH0KbGlicmFyeShnZ3Bsb3QyKQpsaWJyYXJ5KHB1cnJyKQpsaWJyYXJ5KHNjcmF0dGNoLnZpcykKbGlicmFyeShzY3JhdHRjaC5oaWNhdCkKbGlicmFyeShNYXRyaXgpCmxpYnJhcnkoZHBseXIpCmxpYnJhcnkodGlkeXIpCmxpYnJhcnkocGFyYWxsZWwpCmxpYnJhcnkoYmlnc3RhdHNyKQpsaWJyYXJ5KHNjcmF0dGNoLmJpZ2NhdCkKbGlicmFyeShkYXRhLnRhYmxlKQpsaWJyYXJ5KGFycm93KQpsaWJyYXJ5KEJpb2NOZWlnaGJvcnMpCgpgYGAKCmBgYHtyIGxvYWQtQUJDZGF0YSwgLCBldmFsPVR9ClVSTCA9ICdodHRwczovL2FsbGVuLWJyYWluLWNlbGwtYXRsYXMuczMtdXMtd2VzdC0yLmFtYXpvbmF3cy5jb20vbWV0YWRhdGEvV01CLXRheG9ub215LzIwMjMxMjE1L2NsLmRmX0NDTjIwMjMwNzIyMC54bHN4JwpkYXRhID0gcmlvOjppbXBvcnRfbGlzdChVUkwpCgpjb2xvcnMgPC0gcmlvOjppbXBvcnQoImh0dHBzOi8vYWxsZW4tYnJhaW4tY2VsbC1hdGxhcy5zMy11cy13ZXN0LTIuYW1hem9uYXdzLmNvbS9tZXRhZGF0YS9XTUItdGF4b25vbXkvMjAyMzEyMTUvdmlld3MvY2x1c3Rlcl90b19jbHVzdGVyX2Fubm90YXRpb25fbWVtYmVyc2hpcF9jb2xvci5jc3YiKQoKVVJMID0gImh0dHBzOi8vYWxsZW4tYnJhaW4tY2VsbC1hdGxhcy5zMy11cy13ZXN0LTIuYW1hem9uYXdzLmNvbS9tZXRhZGF0YS9XTUItMTBYLzIwMjMxMjE1L2NlbGxfbWV0YWRhdGEuY3N2Igphbm5vLmRmID0gcmlvOjppbXBvcnQoVVJMKQoKYGBgCgpgYGB7ciBzZXQtY29sb3JzLCAgZXZhbD1UfQoKY2wuZGYgPC0gZGF0YSRjbHVzdGVyX2Fubm90YXRpb24KY2wuZGYgPC0gY2wuZGZbY2wuZGYkY2xhc3NfbGFiZWwgIT0gIkxRIixdCgojIGFkZCBjb2xvcnMgdG8gY2x1c3RlciBkYXRhIGZyYW1lCmNvbG9ycyRjbHVzdGVyX2FsaWFzIDwtIGFzLmNoYXJhY3Rlcihhcy5pbnRlZ2VyKGNvbG9ycyRjbHVzdGVyX2FsaWFzKSkKY2wuZGYgPC0gY2wuZGYgJT4lIGxlZnRfam9pbihjb2xvcnMsIGJ5PWMoImNsIj0iY2x1c3Rlcl9hbGlhcyIpKQoKc2VsZWN0LmNvbHVtbnMgPC0gY29sbmFtZXMoY2wuZGYpW2dyZXAoIl5zdXBlcnR5cGUiLCBjb2xuYW1lcyhjbC5kZikpXQpzdC5kZiA8LSBjbC5kZiAlPiUgZ3JvdXBfYnlfYXQoc2VsZWN0LmNvbHVtbnMpICU+JSBzdW1tYXJpc2Uobj1uKCkpCgpzZWxlY3QuY29sdW1ucyA8LSBjb2xuYW1lcyhjbC5kZilbZ3JlcCgiXnN1YmNsYXNzIiwgY29sbmFtZXMoY2wuZGYpKV0Kc2MuZGYgPC0gY2wuZGYgJT4lIGdyb3VwX2J5X2F0KHNlbGVjdC5jb2x1bW5zKSAlPiUgc3VtbWFyaXNlKG49bigpKQoKc2VsZWN0LmNvbHVtbnMgPC0gY29sbmFtZXMoY2wuZGYpW2dyZXAoIl5jbGFzcyIsIGNvbG5hbWVzKGNsLmRmKSldCmMuZGYgPC0gY2wuZGYgJT4lIGdyb3VwX2J5X2F0KHNlbGVjdC5jb2x1bW5zKSAlPiUgc3VtbWFyaXNlKG49bigpKQoKYGBgCgpgYGB7ciBzdWJzZXQtZGF0YSwgLCBldmFsPVR9CmNsLmRmIDwtIGNsLmRmICU+JSBmaWx0ZXIoY2xhc3NfaWQgPT0gNikKY2wuZGYkY2wgPC0gYXMuaW50ZWdlcihhcy5jaGFyYWN0ZXIoY2wuZGYkY2wpKQoKYW5uby5kZiA8LSBhbm5vLmRmICU+JSAKICBmaWx0ZXIoY2x1c3Rlcl9hbGlhcyAlaW4lIGNsLmRmJGNsKSAlPiUgCiAgIyBmaWx0ZXIobGlicmFyeV9tZXRob2QgPT0gIjEwWHYzIikgJT4lCiAgbGVmdF9qb2luKGNsLmRmWyxjKDE6MTIpXSwgYnk9YygiY2x1c3Rlcl9hbGlhcyI9ImNsIikpIApyb3duYW1lcyhhbm5vLmRmKSA8LSBhbm5vLmRmJGNlbGxfbGFiZWwKCgpgYGAKCk9uZSBvZiB0aGUgaW5wdXRzIHJlcXVpcmVkIHRvIGdlbmVyYXRlIHRoZSBLTk4gZ3JhcGggaXMgYSByZWR1Y2VkCmRpbWVuc2lvbiBtYXRyaXguIEZvciB0aGUgcHVycG9zZSBvZiB0aGlzIG5vdGVib29rIGEgcHJlLW1hZGUgbWF0cml4IGlzCmRvd25sb2FkZWQKCmBgYHtyIGxvYWQtcmRkYXQsICBldmFsPVR9ClVSTCA8LSAiaHR0cHM6Ly9hbGxlbi1zaGFyZS5zMy51cy1lYXN0LTIuYW1hem9uYXdzLmNvbS9zY3JhdHRjaC5leGFtcGxlL0NUWC1DR0VfR0FCQS5yZC5kYXQuY3N2IgoKcmQuZGF0LmRmIDwtIHJpbzo6aW1wb3J0KFVSTCkKcmQuZGF0ID0gYXMubWF0cml4KHJkLmRhdC5kZlssLTFdKQpyb3cubmFtZXMocmQuZGF0KSA9IHJkLmRhdC5kZltbMV1dCmBgYAoKYGBge3IgbG9hZC11bWFwLCAgZXZhbD1UfQpVUkwgPC0gImh0dHBzOi8vYWxsZW4tc2hhcmUuczMudXMtZWFzdC0yLmFtYXpvbmF3cy5jb20vc2NyYXR0Y2guZXhhbXBsZS9DVFgtQ0dFX0dBQkEudW1hcC4yZC5jc3YiCgp1bWFwLmRmIDwtIHJpbzo6aW1wb3J0KFVSTCwgaGVhZGVyID0gVCkKcm93Lm5hbWVzKHVtYXAuZGYpID0gdW1hcC5kZltbMV1dIAp1bWFwLmRmID0gdW1hcC5kZlssLTFdCmBgYAoKIyMjIENsdXN0ZXIgY29uc3RlbGxhdGlvbgoKYGBge3IgY2x1c3Rlci12ZWN0b3IsIGV2YWw9VH0KY2wuY2wgPSB3aXRoKGFubm8uZGYgJT4lIGZpbHRlcihsaWJyYXJ5X21ldGhvZD09IjEwWHYzIiAmIAogICFpcy5uYShzdWJjbGFzc19pZF9sYWJlbCkgJiBjbHVzdGVyX2FsaWFzICVpbiUgY2wuZGYkY2wpLCBzZXROYW1lcyhjbHVzdGVyX2lkLCBjZWxsX2xhYmVsKSkKCnJkLmRhdCA9IHJkLmRhdFtpbnRlcnNlY3Qocm93bmFtZXMocmQuZGF0KSxuYW1lcyhjbC5jbCkpLF0KYGBgCgpgYGB7ciBjbHVzdGVyLWtubiwgIGV2YWw9VH0KcmVzdWx0ID0gZ2V0X2tubl9ncmFwaChyZC5kYXQsIGNsPWNsLmNsLCBrID01MCkgCmBgYAoKU2VsZWN0IHRoZSBtb3N0IHJvYnVzdCBlZGdlcyBmb3IgcGxvdHRpbmcKCmBgYHtyIGNsdXN0ZXItc2VsZWN0LmtubiwgZXZhbD1UfQprbm4uY2wuZGYgPSByZXN1bHQka25uLmNsLmRmIAprbm4uY2wuZGYgPSBrbm4uY2wuZGYgJT4lIGdyb3VwX2J5KGNsLmZyb20pICU+JSBtdXRhdGUoY2wuZnJvbS5yYW5rID0gcmFuaygtRnJlcSkpCmtubi5jbC5kZiA9IGtubi5jbC5kZiAlPiUgZ3JvdXBfYnkoY2wudG8pICU+JSBtdXRhdGUoY2wudG8ucmFuayA9IHJhbmsoLUZyZXEpKQpzZWxlY3Qua25uLmNsLmRmID0gd2l0aChrbm4uY2wuZGYsIGtubi5jbC5kZltvZGRzID4gMSAmIHB2YWwubG9nIDwgbG9nKDEvMTAwMDAwKSAmIChmcmFjID4gMC4xIHwgZnJhYyA+IDAuMDMgJiBGcmVxID4gMTAwKSAmIChjbC5mcm9tLnJhbmsgPCA0fCBjbC50by5yYW5rIDwgNCksXSkKYGBgCgpDcmVhdGUgdGhlIG5vZGVzIHRvIGJlIHBsb3R0ZWQgb24gdGhlIGNvbnN0ZWxsYXRpb24uIFRoZSBub2RlcyBhcmUKbG9jYXRlZCBhdCB0aGUgY2VudHJvaWQgbG9jYXRpb24gb2YgY2VsbHMgd2l0aGluIGEgZ3JvdXBpbmcgb2YgY2VsbHMuClRoZSBncm91cGluZyBvZiBjZWxscyBpbiB0aGlzIGNhc2UgaXMgY2x1c3Rlci4gRm9yIHBsb3R0aW5nIGEgZmV3CmNvbHVtbnMgYXJlIGV4cGVjdGVkIGJ5IHRoZSBmdW5jdGlvbiwgdGhlc2UgaW5jbHVkZTsKCi0gICBjbHVzdGVyX2lkCgotICAgY2x1c3Rlcl9sYWJlbAoKLSAgIGNsdXN0ZXJfY29sb3IKCi0gICBjbHVzdGVyX3NpemUKCmBgYHtyLCBldmFsPVR9CnByZWZpeCA9ICJDVFgtQ0dFIgoKY2wuY2VudGVyLmRmID0gYXMuZGF0YS5mcmFtZShnZXRfUkRfY2xfY2VudGVyKHVtYXAuZGYsY2wuY2wpKSAKCmNsLmRmJGNsdXN0ZXJfc2l6ZSA8LSByb3dTdW1zKGNsLmRmWyxjKCJ2My5zaXplIiwgInYyLnNpemUiLCAibXVsdGlvbWUuc2l6ZSIgICApXSkKCmNsLmNlbnRlci5kZiRjbHVzdGVyX2lkID0gYXMuaW50ZWdlcihhcy5jaGFyYWN0ZXIocm93Lm5hbWVzKGNsLmNlbnRlci5kZikgKSkKY2wuY2VudGVyLmRmIDwtIGNsLmNlbnRlci5kZiAlPiUgbGVmdF9qb2luKGNsLmRmWyxjKDE6MTIsNDg6NTMpXSkKY2wuY2VudGVyLmRmJGNsdXN0ZXJfbGFiZWwgPC0gY2wuY2VudGVyLmRmJGNsdXN0ZXJfaWRfbGFiZWwKcm93bmFtZXMoY2wuY2VudGVyLmRmKSA8LSBjbC5jZW50ZXIuZGYkY2x1c3Rlcl9pZAoKIyBzZXQgY2wgYXMgY2x1c3Rlcl9pZCBzaW5jZSB0aGF0IHdhcyB1c2VkIHRvIHN1bW1hcmlzZSB0aGUgZWRnZXMKY2wuY2VudGVyLmRmJGNsID0gYXMuaW50ZWdlcihhcy5jaGFyYWN0ZXIocm93Lm5hbWVzKGNsLmNlbnRlci5kZikgKSkKCnRtcC5jbCA9IGNsLmNlbnRlci5kZiRjbHVzdGVyX2lkCnRtcC5rbm4uY2wuZGYgPSBzZWxlY3Qua25uLmNsLmRmICU+JSBmaWx0ZXIoY2wuZnJvbSAlaW4lIHRtcC5jbCAmIGNsLnRvICVpbiUgdG1wLmNsKQoKYGBgCgpgYGB7ciBwbG90MSwgIHJlc3VsdHM9J2hpZGUnLCBldmFsPVQsIGZpZy5oZWlnaHQ9MTAsIGZpZy53aWR0aD0xMH0KICBjLnBsb3Q9cGxvdF9jb25zdGVsbGF0aW9uKHRtcC5rbm4uY2wuZGYsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgY2wuY2VudGVyLmRmPWNsLmNlbnRlci5kZiwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBvdXQuZGlyPSIuLyIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBwcmVmaXg9cGFzdGUwKHByZWZpeCwiLmNsdXN0ZXIuc3Rjb2wiKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgIG5vZGUubGFiZWw9ImNsdXN0ZXJfaWQiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgZXh4YWdlcmF0aW9uPTIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBwbG90LnBhcnRzPUZBTFNFLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuLmxpc3QgPSBULAogICAgICAgICAgICAgICAgICAgICAgICAgICAgbm9kZS5kb2RnZSA9IEYsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBsYWJlbF9yZXBlbCA9IFRSVUUsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBsYWJlbC5zaXplID0gNCwKICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBsb3QuaGVpZ2h0ID0gMTUsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBwbG90LndpZHRoID0gMTUpCmMucGxvdCRjb25zdGVsbGF0aW9uCgpgYGAKCgoKCiMjIyBBZGp1c3QgdGhlIGNvbG9yIG9mIHRoZSBub2RlcyB0byByZWZsZWN0IHN1YmNsYXNzZXMKYGBge3IgcGxvdDIsIGV2YWw9VCwgcmVzdWx0cz0naGlkZScsZmlnLmhlaWdodD0xMCwgZmlnLndpZHRoPTEwfQoKY2wuY2VudGVyLmRmJGNsdXN0ZXJfY29sb3IgPC0gY2wuY2VudGVyLmRmJHN1YmNsYXNzX2NvbG9yCiAgYy5wbG90PXBsb3RfY29uc3RlbGxhdGlvbih0bXAua25uLmNsLmRmLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsLmNlbnRlci5kZj1jbC5jZW50ZXIuZGYsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgb3V0LmRpcj0iLi8iLCAjIGRpcmVjdG9yeSBmb3Igc2F2aW5nIGZpbGVzCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBwcmVmaXg9cGFzdGUwKHByZWZpeCwiLmNsdXN0ZXIuc2Njb2wiKSwgI2ZpbGVuYW1lIGZvciBzYXZpbmcKICAgICAgICAgICAgICAgICAgICAgICAgICAgIG5vZGUubGFiZWw9ImNsdXN0ZXJfaWQiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgZXh4YWdlcmF0aW9uPTIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBwbG90LnBhcnRzPUZBTFNFLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuLmxpc3QgPSBULAogICAgICAgICAgICAgICAgICAgICAgICAgICAgbm9kZS5kb2RnZSA9IEYsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBsYWJlbF9yZXBlbCA9IFRSVUUsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBsYWJlbC5zaXplID0gNCwKICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBsb3QuaGVpZ2h0ID0gMTUsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBwbG90LndpZHRoID0gMTUpCmMucGxvdCRjb25zdGVsbGF0aW9uCgpgYGAKCg==</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Constellation.Rmd");
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
