@@ -9,9 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Cindy van Velthoven" />
 
+<meta name="date" content="2024-05-23" />
 
-<title>Cy’s plotfolio</title>
+<title>CCFv3 centroid locations</title>
 
 <script src="site_libs/header-attrs-2.27/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -33,6 +35,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
@@ -59,6 +63,11 @@ if (window.hljs) {
 
 
 
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
 
 
 
@@ -219,6 +228,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -382,63 +394,134 @@ div.tocify {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+<li role="separator" class="divider"></li>
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
 
 
-<h1 class="title toc-ignore">Cy’s plotfolio</h1>
+
+<h1 class="title toc-ignore">CCFv3 centroid locations</h1>
+<h4 class="author">Cindy van Velthoven</h4>
+<h4 class="date">2024-05-23</h4>
 
 </div>
 
 
-<p>A collection of notebooks to recreate some of the visualizations as
-published in my <a
-href="https://scholar.google.com/citations?user=No8cy_cAAAAJ&amp;hl=en">scientific
-papers</a>.</p>
-<div id="visualizations---hierarchy" class="section level2">
-<h2>Visualizations - hierarchy</h2>
-<p><a href="HierTree.html"><strong>HierTree</strong></a>: An example for
-plotting a hierarchical tree (not dendrogram!) based on result from
-hierarchical clustering.</p>
-<p><img src="images/HierTree.png" /></p>
-<p><br> <br></p>
-<p><a href="Sunburst.html"><strong>Sunburst</strong></a>:</p>
-<p><img src="images/Sunburst.png" /></p>
-<p><br> <br></p>
-</div>
-<div id="visualizations---scsnrna-seq" class="section level2">
-<h2>Visualizations - sc/snRNA-seq</h2>
-<p><a href="Constellation.html"><strong>UMAP-Constellation</strong></a>:
-Creating a UMAP and constellation from small single cell RNA-seq
-dataset</p>
-<p><img src="images/UConn.png" /></p>
-<p><br> <br></p>
-<p><a href="3dUMAP.html"><strong>3D UMAP</strong></a>: Creating a 3D
-UMAP from small single cell RNA-seq dataset</p>
-<p><br> <br></p>
-<p><a href="Node_dodge.html"><strong>Node dodge app </strong></a>:
-Creating a 3D UMAP from small single cell RNA-seq dataset</p>
-<p><br> <br></p>
-</div>
-<div id="visualizations---spatialtx" class="section level2">
-<h2>Visualizations - spatialTX</h2>
-<p><a href="MERFISH_plot.html"><strong>SpatialTx with CCF
-outlines</strong></a>:</p>
-<p><br> <br></p>
-<p><a href="3dMERFISH_plot.html"><strong>3D SpatialTx</strong></a>:</p>
-<p><br> <br></p>
-</div>
-<div id="visualizations---ccf" class="section level2">
-<h2>Visualizations - CCF</h2>
-<p><a href="Flatmap.html"><strong>Flatmaps</strong></a>:</p>
-<p><br> <br></p>
-<p><a href="abaISH.html"><strong>ABA - ISH</strong></a>:</p>
-<p><br> <br></p>
-<p><a href="abaSVG.html"><strong>ABA - svg</strong></a>:</p>
-<p><br> <br></p>
-</div>
-<div id="visualizations---random" class="section level2">
-<h2>Visualizations - random</h2>
+<p><br />
+<br />
+</p>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(ggplot2)
+library(ggforce)
+library(cocoframer)
+library(reshape2)
+library(tidyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;tidyr&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:reshape2&#39;:
+## 
+##     smiths</code></pre>
+<pre class="r"><code>library(purrr)
+options(stringsAsFactors = FALSE)</code></pre>
+<p><br />
+</p>
+<div id="get-3d-region-centroids" class="section level1">
+<h1>Get 3d region centroids:</h1>
+<pre class="r"><code>ccf_anno &lt;- get_ccf_annotation() %&gt;% melt()
+
+ccf_anno &lt;- ccf_anno %&gt;%
+  filter(value != 0)
+names(ccf_anno) &lt;- c(&quot;x&quot;,&quot;y&quot;,&quot;z&quot;,&quot;id&quot;)
+
+
+ont &lt;- get_mba_ontology() %&gt;% flatten_mba_ontology()
+ont &lt;- generate_mba_taxons(ont)</code></pre>
+<p><br />
+<br />
+</p>
+<pre class="r"><code>region_groups &lt;- data.frame(
+  
+  region_group = c(rep(&quot;RHP&quot;, 5),
+                   &quot;ENT&quot;,
+                   rep(&quot;HIP&quot;,4),
+                   &quot;ACA&quot;,
+                   rep(&quot;TEa-PERI-ECT&quot;, 3),
+                   &quot;RSP&quot;,
+                   rep(&quot;VIS&quot;, 7),
+                   &quot;VISp&quot;,
+                   &quot;PTLp&quot;,
+                   &quot;AUD&quot;,
+                   &quot;SSp&quot;,
+                   rep(&quot;SSs-GU-VISC-AIp&quot;, 4),
+                   rep(&quot;AI&quot;, 2),
+                   &quot;CLA&quot;,
+                   rep(&quot;MOs-FRP&quot;, 2),
+                   rep(&quot;MOp&quot;,1),
+                   rep(&quot;PL-ILA-ORB&quot;, 3)),
+  acronym = c(&quot;PAR&quot;,&quot;POST&quot;,&quot;PRE&quot;,&quot;SUB&quot;,&quot;ProS&quot;,
+              &quot;ENT&quot;,
+              &quot;CA&quot;,&quot;DG&quot;,&quot;FC&quot;,&quot;IG&quot;,
+              &quot;ACA&quot;,
+              &quot;TEa&quot;,&quot;PERI&quot;,&quot;ECT&quot;,
+              &quot;RSP&quot;,
+              &quot;VISal&quot;,&quot;VISam&quot;,&quot;VISl&quot;,&quot;VISpl&quot;,&quot;VISpm&quot;,&quot;VISli&quot;,&quot;VISpor&quot;,
+              &quot;VISp&quot;,
+              &quot;PTLp&quot;,
+              &quot;AUD&quot;,
+              &quot;SSp&quot;,
+              &quot;SSs&quot;,&quot;GU&quot;,&quot;VISC&quot;,&quot;AIp&quot;,
+              &quot;AId&quot;,&quot;AIv&quot;,
+              &quot;CLA&quot;,
+              &quot;MOs&quot;,&quot;FRP&quot;,
+              &quot;MOp&quot;,
+              &quot;PL&quot;,&quot;ILA&quot;,&quot;ORB&quot;)
+)</code></pre>
+<p><br />
+<br />
+</p>
+<pre class="r"><code>region_ont &lt;- map_dfr(1:nrow(region_groups),
+                      function(x) {
+                        parent_acronym &lt;- region_groups$acronym[x]
+                        ontology_children &lt;- filter_mba_ontology_children(ont,
+                                                                          parent_acronym,
+                                                                          include_parent = TRUE)
+                        ontology_children$region_group &lt;- region_groups$region_group[x]
+                        ontology_children
+                      })</code></pre>
+<p><br />
+<br />
+</p>
+<pre class="r"><code>region_vox &lt;- ccf_anno %&gt;%
+  filter(id %in% region_ont$id) %&gt;%
+  left_join(region_ont)</code></pre>
+<pre><code>## Joining with `by = join_by(id)`</code></pre>
+<p><br />
+<br />
+</p>
+<pre class="r"><code>region_centroids &lt;- region_vox %&gt;%
+  filter(z &lt; 229) %&gt;% # one hemisphere
+  group_by(region_group) %&gt;%
+  summarise(vox = n(),
+            x = mean(x),
+            y = mean(y),
+            z = mean(z))</code></pre>
 </div>
 
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkNDRnYzIGNlbnRyb2lkIGxvY2F0aW9ucyINCmF1dGhvcjogIkNpbmR5IHZhbiBWZWx0aG92ZW4iDQpvdXRwdXQ6DQogIGh0bWxfZG9jdW1lbnQ6DQogICAgdG9jOiB0cnVlDQogICAgdG9jX2Zsb2F0OiB0cnVlDQogICAgY29kZV9kb3dubG9hZDogdHJ1ZQ0KICAgIGNvZGVfZm9sZGluZzogc2hvdw0KZGF0ZTogIjIwMjQtMDUtMjMiDQplZGl0b3Jfb3B0aW9uczogDQogIG1hcmtkb3duOiANCiAgICB3cmFwOiA3Mg0KLS0tDQpcDQpcDQoNCmBgYHtyfQ0KbGlicmFyeShkcGx5cikNCmxpYnJhcnkoZ2dwbG90MikNCmxpYnJhcnkoZ2dmb3JjZSkNCmxpYnJhcnkoY29jb2ZyYW1lcikNCmxpYnJhcnkocmVzaGFwZTIpDQpsaWJyYXJ5KHRpZHlyKQ0KbGlicmFyeShwdXJycikNCm9wdGlvbnMoc3RyaW5nc0FzRmFjdG9ycyA9IEZBTFNFKQ0KDQpgYGANClwNCg0KIyBHZXQgM2QgcmVnaW9uIGNlbnRyb2lkczoNCg0KYGBge3J9DQpjY2ZfYW5ubyA8LSBnZXRfY2NmX2Fubm90YXRpb24oKSAlPiUgbWVsdCgpDQoNCmNjZl9hbm5vIDwtIGNjZl9hbm5vICU+JQ0KICBmaWx0ZXIodmFsdWUgIT0gMCkNCm5hbWVzKGNjZl9hbm5vKSA8LSBjKCJ4IiwieSIsInoiLCJpZCIpDQoNCg0Kb250IDwtIGdldF9tYmFfb250b2xvZ3koKSAlPiUgZmxhdHRlbl9tYmFfb250b2xvZ3koKQ0Kb250IDwtIGdlbmVyYXRlX21iYV90YXhvbnMob250KQ0KDQpgYGANCg0KXA0KXA0KDQpgYGB7cn0NCnJlZ2lvbl9ncm91cHMgPC0gZGF0YS5mcmFtZSgNCiAgDQogIHJlZ2lvbl9ncm91cCA9IGMocmVwKCJSSFAiLCA1KSwNCiAgICAgICAgICAgICAgICAgICAiRU5UIiwNCiAgICAgICAgICAgICAgICAgICByZXAoIkhJUCIsNCksDQogICAgICAgICAgICAgICAgICAgIkFDQSIsDQogICAgICAgICAgICAgICAgICAgcmVwKCJURWEtUEVSSS1FQ1QiLCAzKSwNCiAgICAgICAgICAgICAgICAgICAiUlNQIiwNCiAgICAgICAgICAgICAgICAgICByZXAoIlZJUyIsIDcpLA0KICAgICAgICAgICAgICAgICAgICJWSVNwIiwNCiAgICAgICAgICAgICAgICAgICAiUFRMcCIsDQogICAgICAgICAgICAgICAgICAgIkFVRCIsDQogICAgICAgICAgICAgICAgICAgIlNTcCIsDQogICAgICAgICAgICAgICAgICAgcmVwKCJTU3MtR1UtVklTQy1BSXAiLCA0KSwNCiAgICAgICAgICAgICAgICAgICByZXAoIkFJIiwgMiksDQogICAgICAgICAgICAgICAgICAgIkNMQSIsDQogICAgICAgICAgICAgICAgICAgcmVwKCJNT3MtRlJQIiwgMiksDQogICAgICAgICAgICAgICAgICAgcmVwKCJNT3AiLDEpLA0KICAgICAgICAgICAgICAgICAgIHJlcCgiUEwtSUxBLU9SQiIsIDMpKSwNCiAgYWNyb255bSA9IGMoIlBBUiIsIlBPU1QiLCJQUkUiLCJTVUIiLCJQcm9TIiwNCiAgICAgICAgICAgICAgIkVOVCIsDQogICAgICAgICAgICAgICJDQSIsIkRHIiwiRkMiLCJJRyIsDQogICAgICAgICAgICAgICJBQ0EiLA0KICAgICAgICAgICAgICAiVEVhIiwiUEVSSSIsIkVDVCIsDQogICAgICAgICAgICAgICJSU1AiLA0KICAgICAgICAgICAgICAiVklTYWwiLCJWSVNhbSIsIlZJU2wiLCJWSVNwbCIsIlZJU3BtIiwiVklTbGkiLCJWSVNwb3IiLA0KICAgICAgICAgICAgICAiVklTcCIsDQogICAgICAgICAgICAgICJQVExwIiwNCiAgICAgICAgICAgICAgIkFVRCIsDQogICAgICAgICAgICAgICJTU3AiLA0KICAgICAgICAgICAgICAiU1NzIiwiR1UiLCJWSVNDIiwiQUlwIiwNCiAgICAgICAgICAgICAgIkFJZCIsIkFJdiIsDQogICAgICAgICAgICAgICJDTEEiLA0KICAgICAgICAgICAgICAiTU9zIiwiRlJQIiwNCiAgICAgICAgICAgICAgIk1PcCIsDQogICAgICAgICAgICAgICJQTCIsIklMQSIsIk9SQiIpDQopDQpgYGANClwNClwNCmBgYHtyfQ0KcmVnaW9uX29udCA8LSBtYXBfZGZyKDE6bnJvdyhyZWdpb25fZ3JvdXBzKSwNCiAgICAgICAgICAgICAgICAgICAgICBmdW5jdGlvbih4KSB7DQogICAgICAgICAgICAgICAgICAgICAgICBwYXJlbnRfYWNyb255bSA8LSByZWdpb25fZ3JvdXBzJGFjcm9ueW1beF0NCiAgICAgICAgICAgICAgICAgICAgICAgIG9udG9sb2d5X2NoaWxkcmVuIDwtIGZpbHRlcl9tYmFfb250b2xvZ3lfY2hpbGRyZW4ob250LA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwYXJlbnRfYWNyb255bSwNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaW5jbHVkZV9wYXJlbnQgPSBUUlVFKQ0KICAgICAgICAgICAgICAgICAgICAgICAgb250b2xvZ3lfY2hpbGRyZW4kcmVnaW9uX2dyb3VwIDwtIHJlZ2lvbl9ncm91cHMkcmVnaW9uX2dyb3VwW3hdDQogICAgICAgICAgICAgICAgICAgICAgICBvbnRvbG9neV9jaGlsZHJlbg0KICAgICAgICAgICAgICAgICAgICAgIH0pDQpgYGANCg0KXA0KXA0KYGBge3J9DQpyZWdpb25fdm94IDwtIGNjZl9hbm5vICU+JQ0KICBmaWx0ZXIoaWQgJWluJSByZWdpb25fb250JGlkKSAlPiUNCiAgbGVmdF9qb2luKHJlZ2lvbl9vbnQpDQpgYGANClwNClwNCg0KYGBge3J9DQpyZWdpb25fY2VudHJvaWRzIDwtIHJlZ2lvbl92b3ggJT4lDQogIGZpbHRlcih6IDwgMjI5KSAlPiUgIyBvbmUgaGVtaXNwaGVyZQ0KICBncm91cF9ieShyZWdpb25fZ3JvdXApICU+JQ0KICBzdW1tYXJpc2Uodm94ID0gbigpLA0KICAgICAgICAgICAgeCA9IG1lYW4oeCksDQogICAgICAgICAgICB5ID0gbWVhbih5KSwNCiAgICAgICAgICAgIHogPSBtZWFuKHopKQ0KYGBgDQoNCg==</div>
 
 
 </div>
@@ -474,6 +557,12 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("CCF_centroid.Rmd");
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {

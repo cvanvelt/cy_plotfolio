@@ -10,6 +10,24 @@ navbar:
         href: HierTree.html 
       - text: Sunburst
         href: Sunburst.html 
+      - text: Constellation
+        href: Constellation.html 
+      - text: Raincloud
+        href: Raincloud.html 
+    - text: "Notebooks"
+      menu: 
+      - text: "CCF centroid"
+        href: CCF_centroid.html
+      - text: "ABA ISH data"
+        href: ABA_ISH.html
+      - text: "CCFv3 plates"
+        href: ABA_svg.html
+      - text: "Flatmaps"
+        href: IBL_flatmap.html
+      - text: "CellRanger subsample"
+        href: CR_subsample.html
+      - text: "CellRanger intron_exon"
+        href: CR_intron_exon.html
     - text: "About"
       href: about.html
 output_dir: docs
